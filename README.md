@@ -3,6 +3,10 @@
 A [Windhawk](https://windhawk.net) mod for Windows 11 multi-monitor setups: **every taskbar acts like
 its own main taskbar.**
 
+![Each taskbar shows only the windows of its own monitor](images/windows-per-monitor.png)
+
+![Separate pinned items for each taskbar](images/pins-per-taskbar.png)
+
 *Deutsche Beschreibung weiter unten.*
 
 ## Features
@@ -27,10 +31,8 @@ its own main taskbar.**
 | Pins | own pins per taskbar · same pins everywhere |
 | Unassigned pins | primary taskbar only · all taskbars |
 | Bring running apps to the front | on/off, from any monitor or only from the clicked taskbar's monitor |
-| Slide in sideways | on/off |
-| Ctrl+click menu | on/off |
-| Configure the taskbar settings automatically | on/off |
-| Diagnostic log | on/off |
+| Slide animation | on/off |
+| Show taskbar apps on all taskbars | required for the mod; applied internally, your Windows setting isn't changed |
 
 ## Installation
 
@@ -44,8 +46,9 @@ Until then:
    [`taskbar-independent-per-monitor.wh.cpp`](taskbar-independent-per-monitor.wh.cpp).
 4. Click **Compile Mod**, then **Exit Editing Mode**.
 
-The mod sets *Show my taskbar on all displays* = on and *When using multiple displays, show my taskbar
-apps on* = All taskbars itself and restores the previous values when it's disabled or removed.
+*Show my taskbar on all displays* must be enabled. The mod shows taskbar apps on all taskbars
+internally while it's running; the *When using multiple displays, show my taskbar apps on* setting
+isn't changed.
 
 **Uninstall:** Windhawk → the mod → **Remove**.
 
@@ -72,8 +75,8 @@ Hauptleiste.**
 
 **Installieren:** In Windhawk unter *Erkunden* nach „Eigenständige Taskleiste pro Monitor“ suchen, oder
 bis dahin: *Neue Mod erstellen* → Inhalt von `taskbar-independent-per-monitor.wh.cpp` einfügen →
-*Mod kompilieren* → *Editor beenden*. Die nötigen Windows-Einstellungen setzt die Mod selbst und stellt
-beim Entfernen die vorherigen Werte wieder her.
+*Mod kompilieren* → *Editor beenden*. „Taskleiste auf allen Anzeigen anzeigen“ muss an sein. Die Einstellung
+„Apps anzeigen auf“ ändert die Mod nicht, sie wirkt nur intern, solange die Mod läuft.
 
 **Deinstallieren:** In Windhawk bei der Mod auf *Entfernen* klicken.
 

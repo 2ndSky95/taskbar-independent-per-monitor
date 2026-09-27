@@ -1,5 +1,19 @@
 # Änderungen – Taskbar Monitor Pins
 
+## 1.5.0 – 28.09.2026
+- **Windows-Einstellungen bleiben unangetastet:** Statt „Apps anzeigen auf: Alle Taskleisten“ in der Registry
+  umzustellen, spielt die Mod der Taskleiste diesen Wert nur vor, solange sie läuft (Einstellung „Show taskbar
+  apps on all taskbars“, standardmäßig an). Nichts wird geschrieben, nichts muss wiederhergestellt werden.
+- **Strg+Klick-Menü entfernt** – Anheften/Lösen pro Leiste geht per Rechtsklick.
+- Einstellung „Diagnose-Log“ entfernt (Windhawk hat ein eigenes Log).
+- **Sicherer bei Windows-Updates:** Jede Taskleiste wird vor der Nutzung anhand der Funktionstabellen geprüft; bei
+  unbekanntem Aufbau lässt die Mod sie in Ruhe, statt den Explorer abstürzen zu lassen. Die Gruppenliste wird auf
+  Plausibilität geprüft.
+- Speicherlecks behoben (Gruppenliste, Verknüpfungs-Pidls der Jump List), Race-Condition beim Lesen der
+  Pin-Zuordnungen behoben, Testcode entfernt, Nachrichtenfenster nimmt keine Befehle von Prozessen mit niedrigen
+  Rechten mehr an.
+- Beschreibung und Einstellungen im Stil der offiziellen Mods, mit Bildern.
+
 ## 1.4.0 – 27.09.2026
 - **Neuer Name:** „Independent taskbar per monitor“ (deutsch: „Eigenständige Taskleiste pro Monitor“),
   Mod-ID `taskbar-independent-per-monitor`, Autor 2ndSky95. Vorbereitet für den offiziellen Windhawk-Katalog.
