@@ -13,6 +13,11 @@
   Pin-Zuordnungen behoben, Testcode entfernt, Nachrichtenfenster nimmt keine Befehle von Prozessen mit niedrigen
   Rechten mehr an.
 - Beschreibung und Einstellungen im Stil der offiziellen Mods, mit Bildern.
+- Taskleisten werden am Monitor selbst erkannt statt an der Position: Pins bleiben beim Umstecken/Umordnen erhalten,
+  bis zu 32 Monitore.
+- Fensterwechsel zwischen Monitoren über die Meldung der Taskleiste statt eines sitzungsweiten WinEvent-Hooks.
+- „Zusätzlich anheften“ prüft App-ID und Pfad; eine andere App wird nie mehr fälschlich mit angeheftet.
+- Läuft auch auf ARM64 (`x86-64`).
 
 ## 1.4.0 – 27.09.2026
 - **Neuer Name:** „Independent taskbar per monitor“ (deutsch: „Eigenständige Taskleiste pro Monitor“),
