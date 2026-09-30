@@ -18,6 +18,7 @@
 - Fensterwechsel zwischen Monitoren über die Meldung der Taskleiste statt eines sitzungsweiten WinEvent-Hooks.
 - „Zusätzlich anheften“ prüft App-ID und Pfad; eine andere App wird nie mehr fälschlich mit angeheftet.
 - Läuft auch auf ARM64 (`x86-64`).
+- UWP-Apps (Einstellungen, Rechner …) werden jetzt auch pro Monitor gefiltert, auch beim Verschieben.
 
 ## 1.4.0 – 27.09.2026
 - **Neuer Name:** „Independent taskbar per monitor“ (deutsch: „Eigenständige Taskleiste pro Monitor“),
