@@ -1,5 +1,27 @@
 # Änderungen – Taskbar Monitor Pins
 
+## 1.6.0 – 14.10.2026
+- **Läuft jetzt auch unter Windows 10** (getestet: Tiny10 23H2 = Build 19044, 4 Monitore mit 1920×1080).
+  Fenster pro Monitor, eigene Pins pro Leiste, zusätzlich anheften, nur auf einer Leiste lösen,
+  laufende App nach vorn holen und Verschieben funktionieren wie unter Windows 11.
+- Gleit-Animation und Label-Korrektur bleiben Windows 11 vorbehalten (Windows 10 hat keine XAML-Taskleiste).
+- **Eigene Reihenfolge pro Taskleiste:** Umsortieren auf einer Leiste ändert die anderen nicht mehr und bleibt
+  nach einem Neustart erhalten (Speicher `pinOrder`). Gilt für Pins und Fenster-Buttons: verschobene Fenster
+  behalten ihren Platz, neu geöffnete Programme kommen sofort hinten an (vorher konnte z. B. der Explorer vorn
+  auftauchen). Neue Buttons werden gleich an ihrem Platz angelegt (`_CreateTBGroup`) – kein Umsortieren hinterher.
+  Anheften/Lösen bei offenem Fenster lässt den Button stehen. Unter Windows 10 und 11 getestet.
+- **Pins landen, wo man sie loslässt:** Eine Verknüpfung vom Desktop landet in der Lücke, die die Leiste beim
+  Ziehen zeigt (vorher hinten); ein Pin, der auf eine andere Leiste gezogen wird, an der Stelle unter der Maus
+  (Windows 10: Trefferprüfung der Leiste, Windows 11: Button-Positionen, während des Ziehens gelesen).
+- **Neue Einstellung „Apps auf dem Monitor der angeklickten Taskleiste öffnen“** (Standard: an): Öffnet eine
+  angeheftete App ihr Fenster auf einem anderen Monitor, schiebt die Mod es auf den Monitor des angeklickten Pins
+  (Größe bleibt, maximiert bleibt maximiert; 3 s lang, falls die App sich selbst zurücksetzt, endet beim Ziehen).
+- **Pin auf eine andere Taskleiste ziehen:** Ein Pin, der auf einer anderen Leiste losgelassen wird,
+  wandert dorthin (verschieben, nicht kopieren). Windows 10 und 11, auch mit gekürzter (gestylter) Taskleiste.
+- Einstellung „Laufende Apps nach vorn holen“ erklärt jetzt Mittelklick/Umschalt+Klick für ein zweites Fenster.
+- Unter Windows 10 lädt die Mod zusätzlich in `RuntimeBroker.exe` (dort ändert die Sprungliste die Pin-Liste),
+  unter Windows 11 weiter in `sihost.exe`; im jeweils anderen Prozess beendet sie sich sofort.
+
 ## 1.5.0 – 28.09.2026
 - **Windows-Einstellungen bleiben unangetastet:** Statt „Apps anzeigen auf: Alle Taskleisten“ in der Registry
   umzustellen, spielt die Mod der Taskleiste diesen Wert nur vor, solange sie läuft (Einstellung „Show taskbar
