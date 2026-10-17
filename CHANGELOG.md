@@ -6,9 +6,9 @@
   laufende App nach vorn holen und Verschieben funktionieren wie unter Windows 11.
 - Gleit-Animation und Label-Korrektur bleiben Windows 11 vorbehalten (Windows 10 hat keine XAML-Taskleiste).
 - **Eigene Reihenfolge pro Taskleiste:** Umsortieren auf einer Leiste ändert die anderen nicht mehr und bleibt
-  nach einem Neustart erhalten (Speicher `pinOrder`). Gilt für Pins und Fenster-Buttons: verschobene Fenster
-  behalten ihren Platz, neu geöffnete Programme kommen sofort hinten an (vorher konnte z. B. der Explorer vorn
-  auftauchen). Neue Buttons werden gleich an ihrem Platz angelegt (`_CreateTBGroup`) – kein Umsortieren hinterher.
+  nach einem Neustart erhalten (Speicher `pinOrder<Monitor>`, je Leiste höchstens 100 Einträge). Gilt für Pins
+  und Fenster-Buttons: verschobene Fenster behalten ihren Platz, neu geöffnete Programme kommen sofort hinten
+  an (vorher konnte z. B. der Explorer vorn auftauchen). Neue Buttons werden gleich an ihrem Platz angelegt (`_CreateTBGroup`) – kein Umsortieren hinterher.
   Anheften/Lösen bei offenem Fenster lässt den Button stehen. Unter Windows 10 und 11 getestet.
 - **Pins landen, wo man sie loslässt:** Eine Verknüpfung vom Desktop landet in der Lücke, die die Leiste beim
   Ziehen zeigt (vorher hinten); ein Pin, der auf eine andere Leiste gezogen wird, an der Stelle unter der Maus
