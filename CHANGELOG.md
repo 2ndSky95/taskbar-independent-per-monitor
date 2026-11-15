@@ -8,7 +8,9 @@
   nicht antwortet: Wiederherstellen per `ShowWindowAsync`.
 - Fenster-Monitor (1.6.1) überarbeitet: Fenster, die einen Monitor berühren oder minimiert sind, zählen wie vor
   1.6.1; ein bei −32000 geparktes Fenster behält den zuletzt bekannten Monitor (sonst Hauptmonitor) und
-  landet nie auf dem linken.
+  landet nie auf dem linken. Der Merk-Speicher gilt nur für Fenster mit Taskleisten-Button, wird beim Schließen
+  und Entladen geleert und ist begrenzt (2000): zuerst entfallen Einträge toter Fenster, dann die am längsten
+  nicht benutzten (bis 1800), nie alles auf einmal.
 
 ## 1.6.1 – 31.10.2026
 - **Fenster-Buttons landen nicht mehr fälschlich auf dem linken Monitor:** Windows parkt minimierte Fenster (und
