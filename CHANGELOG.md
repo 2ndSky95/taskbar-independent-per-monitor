@@ -1,11 +1,14 @@
 # Änderungen – Taskbar Monitor Pins
 
 ## 1.7.0 – 15.11.2026
-- **Einstellungen in Gruppen:** Fenster · Angeheftete Apps · Klick-Verhalten · Animation (Werte heißen jetzt
-  `gruppe.name`). Bestehende Einstellungen bleiben erhalten: Solange nichts im neuen Layout gespeichert wurde,
-  liest die Mod die alten Namen weiter.
-- **Einstellungen auf Englisch, Deutsch, Russisch, Französisch und Spanisch.**
-- Enthält den Fix aus 1.6.1 (`WinMonitor`).
+- **Einstellungen auf Englisch, Deutsch, Russisch, Französisch und Spanisch**, kürzere Texte, neue Reihenfolge
+  (Fenster, Angeheftete Apps, Klick-Verhalten, Animation). Namen und Standardwerte unverändert, bestehende
+  Einstellungen bleiben erhalten.
+- **Kein Einfrieren der Taskleiste mehr beim Klick auf einen Pin,** dessen App mit minimiertem Fenster gerade
+  nicht antwortet: Wiederherstellen per `ShowWindowAsync`.
+- Fenster-Monitor (1.6.1) überarbeitet: Fenster, die einen Monitor berühren oder minimiert sind, zählen wie vor
+  1.6.1; ein bei −32000 geparktes Fenster behält den zuletzt bekannten Monitor (sonst Hauptmonitor) und
+  landet nie auf dem linken.
 
 ## 1.6.1 – 31.10.2026
 - **Fenster-Buttons landen nicht mehr fälschlich auf dem linken Monitor:** Windows parkt minimierte Fenster (und
