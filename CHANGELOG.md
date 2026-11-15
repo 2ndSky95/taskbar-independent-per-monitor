@@ -1,5 +1,19 @@
 # Änderungen – Taskbar Monitor Pins
 
+## 1.7.0 – 15.11.2026
+- **Einstellungen in Gruppen:** Fenster · Angeheftete Apps · Klick-Verhalten · Animation (Werte heißen jetzt
+  `gruppe.name`). Bestehende Einstellungen bleiben erhalten: Solange nichts im neuen Layout gespeichert wurde,
+  liest die Mod die alten Namen weiter.
+- **Einstellungen auf Englisch, Deutsch, Russisch, Französisch und Spanisch.**
+- Enthält den Fix aus 1.6.1 (`WinMonitor`).
+
+## 1.6.1 – 31.10.2026
+- **Fenster-Buttons landen nicht mehr fälschlich auf dem linken Monitor:** Windows parkt minimierte Fenster (und
+  manche Apps ihre versteckten Fenster) bei −32000/−32000. Die Mod nahm dafür den „nächstgelegenen“ Monitor, also
+  den ganz linken. Wer schnell minimierte oder ein Fenster schloss und neu öffnete, sah z. B. Firefox (M2) und
+  Discord (M3) auf der Leiste von M1. Jetzt zählt bei Fenstern außerhalb aller Monitore deren
+  Wiederherstellungs-Position (`WinMonitor`), notfalls der Hauptmonitor.
+
 ## 1.6.0 – 14.10.2026
 - **Läuft jetzt auch unter Windows 10** (getestet: Tiny10 23H2 = Build 19044, 4 Monitore mit 1920×1080).
   Fenster pro Monitor, eigene Pins pro Leiste, zusätzlich anheften, nur auf einer Leiste lösen,
