@@ -1,5 +1,18 @@
 # Änderungen – Taskbar Monitor Pins
 
+## 1.7.1 – 22.11.2026
+- **Verträglich mit „Disable grouping on the taskbar“** (auch „Pinned items remain in place“, Wunsch aus
+  ramensoftware/windhawk-mods#7783). Diese Mod gibt jedem Fenster eine eigene App-Gruppe mit Endung
+  `~Wh~…` an der AppID. Die Mod erkennt das jetzt:
+  - Sprungliste eines Fensters auf einer Leiste ohne Pin zeigt wieder „An Taskleiste anheften“ (vorher
+    „Von Taskleiste lösen“, das den Pin auf einer anderen Leiste löste).
+  - Anheften am Fenster legt den Pin auf die Leiste der Sprungliste (vorher auf der Hauptleiste).
+  - Pin-Regeln gelten für die AppID ohne Endung.
+- Details-Text in Englisch, Deutsch, Russisch, Französisch und Spanisch untereinander; Hinweis zu anderen
+  Mods als Empfehlung („selbst prüfen, keine Garantie“) statt „nicht kompatibel“; Link zum Fehler-Melden.
+- Neue Bilder: zwei GIFs „ohne Mod“ / „mit Mod“ (`tools\draw-gifs.py`, flache Farben), mit Anheften und
+  Fenster-Verschieben. Bild-Links auf feste Commit-Kennung 68d3b6f (eigenes Repo).
+
 ## 1.7.0 – 15.11.2026
 - **Einstellungen auf Englisch, Deutsch, Russisch, Französisch und Spanisch**, kürzere Texte, neue Reihenfolge
   (Fenster, Angeheftete Apps, Klick-Verhalten, Animation). Namen und Standardwerte unverändert, bestehende

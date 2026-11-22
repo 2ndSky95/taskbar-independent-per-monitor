@@ -10,7 +10,7 @@
 // @description:ru-RU Каждая панель задач показывает только окна своего монитора и имеет свои закреплённые приложения
 // @description:fr-FR Chaque barre des tâches affiche uniquement les fenêtres de son écran et a ses propres applications épinglées
 // @description:es-ES Cada barra de tareas muestra solo las ventanas de su monitor y tiene sus propias aplicaciones ancladas
-// @version         1.7.0
+// @version         1.7.1
 // @author          2ndSky95
 // @github          https://github.com/2ndSky95
 // @license         MIT
@@ -25,16 +25,24 @@
 /*
 # Independent taskbar per monitor
 
+![Without the mod](https://raw.githubusercontent.com/2ndSky95/taskbar-independent-per-monitor/68d3b6ff905236f0b14d28841304371f5c39ec9a/images/without-mod.gif) \
+![GB](https://raw.githubusercontent.com/2ndSky95/taskbar-independent-per-monitor/ffbfed14f39f6c66687462cb35a0fd3d22e50295/images/flags/gb.png) *Without the mod*  ·  ![DE](https://raw.githubusercontent.com/2ndSky95/taskbar-independent-per-monitor/ffbfed14f39f6c66687462cb35a0fd3d22e50295/images/flags/de.png) *Ohne Mod*  ·  ![RU](https://raw.githubusercontent.com/2ndSky95/taskbar-independent-per-monitor/ffbfed14f39f6c66687462cb35a0fd3d22e50295/images/flags/ru.png) *Без мода*  ·  ![FR](https://raw.githubusercontent.com/2ndSky95/taskbar-independent-per-monitor/ffbfed14f39f6c66687462cb35a0fd3d22e50295/images/flags/fr.png) *Sans le mod*  ·  ![ES](https://raw.githubusercontent.com/2ndSky95/taskbar-independent-per-monitor/ffbfed14f39f6c66687462cb35a0fd3d22e50295/images/flags/es.png) *Sin el mod*
+
+&nbsp;
+
+![With the mod](https://raw.githubusercontent.com/2ndSky95/taskbar-independent-per-monitor/68d3b6ff905236f0b14d28841304371f5c39ec9a/images/with-mod.gif) \
+![GB](https://raw.githubusercontent.com/2ndSky95/taskbar-independent-per-monitor/ffbfed14f39f6c66687462cb35a0fd3d22e50295/images/flags/gb.png) *With the mod*  ·  ![DE](https://raw.githubusercontent.com/2ndSky95/taskbar-independent-per-monitor/ffbfed14f39f6c66687462cb35a0fd3d22e50295/images/flags/de.png) *Mit Mod*  ·  ![RU](https://raw.githubusercontent.com/2ndSky95/taskbar-independent-per-monitor/ffbfed14f39f6c66687462cb35a0fd3d22e50295/images/flags/ru.png) *С модом*  ·  ![FR](https://raw.githubusercontent.com/2ndSky95/taskbar-independent-per-monitor/ffbfed14f39f6c66687462cb35a0fd3d22e50295/images/flags/fr.png) *Avec le mod*  ·  ![ES](https://raw.githubusercontent.com/2ndSky95/taskbar-independent-per-monitor/ffbfed14f39f6c66687462cb35a0fd3d22e50295/images/flags/es.png) *Con el mod*
+
+---
+
+## ![GB](https://raw.githubusercontent.com/2ndSky95/taskbar-independent-per-monitor/ffbfed14f39f6c66687462cb35a0fd3d22e50295/images/flags/gb.png) English
+
 Each taskbar behaves like its own main taskbar.
 
-Settings are available in English, German, Russian, French and Spanish.
+The pictures show: pinned items only, windows grouped and ungrouped, with and
+without labels, dragging a window to another monitor and pinning an app.
 
-![Each taskbar shows only the windows of its own monitor](https://raw.githubusercontent.com/2ndSky95/taskbar-independent-per-monitor/ea374053f26cfbfe3865461bdd4adf86dce6b782/images/windows-per-monitor.png) \
-*Each taskbar shows only the windows of its own monitor*
-
-![Separate pinned items for each taskbar](https://raw.githubusercontent.com/2ndSky95/taskbar-independent-per-monitor/ea374053f26cfbfe3865461bdd4adf86dce6b782/images/pins-per-taskbar.png) \
-*Separate pinned items for each taskbar*
-
+* Each taskbar shows only the windows of its own monitor.
 * Pin/unpin from the jump list applies to that taskbar only.
 * Pin *Properties* can differ per taskbar.
 * Clicking the pin of a running app brings its window to the front (Shift+click
@@ -43,9 +51,118 @@ Settings are available in English, German, Russian, French and Spanish.
   are added at the end.
 * Drag a pin to another taskbar to move it there.
 
-Requires 64-bit Windows 10 or Windows 11 and *Show my taskbar on all displays*. Tested with
-*Combine taskbar buttons: Never*. Not compatible with *Disable grouping on the
-taskbar*.
+Requires 64-bit Windows 10 or Windows 11 and *Show my taskbar on all displays*.
+Tested with *Combine taskbar buttons: Never*.
+
+Note: other mods that change the taskbar buttons may get in the way. Please check
+the combination yourself, there is no guarantee.
+
+---
+
+## ![DE](https://raw.githubusercontent.com/2ndSky95/taskbar-independent-per-monitor/ffbfed14f39f6c66687462cb35a0fd3d22e50295/images/flags/de.png) Deutsch
+
+Jede Taskleiste verhält sich wie eine eigene Haupt-Taskleiste.
+
+Die Bilder zeigen: nur Pins, Fenster gruppiert und einzeln, mit und ohne
+Beschriftung, ein Fenster auf einen anderen Monitor ziehen und eine App anheften.
+
+* Jede Taskleiste zeigt nur die Fenster ihres eigenen Monitors.
+* Anheften/Lösen über die Sprungliste gilt nur für diese Taskleiste.
+* Die *Eigenschaften* eines Pins können je Taskleiste verschieden sein.
+* Ein Klick auf den Pin einer laufenden App holt ihr Fenster nach vorn
+  (Umschalt+Klick oder Mittelklick startet eine neue Instanz).
+* Jede Taskleiste behält ihre eigene Reihenfolge, auch nach einem Neustart.
+  Neue Fenster kommen ans Ende.
+* Einen Pin auf eine andere Taskleiste ziehen, um ihn dorthin zu verschieben.
+
+Benötigt 64-Bit-Windows 10 oder Windows 11 und *Taskleiste auf allen Anzeigen
+anzeigen*. Getestet mit *Taskleistenschaltflächen zusammenfassen: Nie*.
+
+Hinweis: Andere Mods, die die Taskleisten-Schaltflächen ändern, können sich in
+die Quere kommen. Bitte die Kombination selbst prüfen, keine Garantie.
+
+---
+
+## ![RU](https://raw.githubusercontent.com/2ndSky95/taskbar-independent-per-monitor/ffbfed14f39f6c66687462cb35a0fd3d22e50295/images/flags/ru.png) Русский
+
+Каждая панель задач работает как отдельная главная панель.
+
+На картинках: только закреплённые значки, окна сгруппированные и по отдельности,
+с подписями и без, перетаскивание окна на другой монитор и закрепление приложения.
+
+* Каждая панель задач показывает только окна своего монитора.
+* Закрепление/открепление через список переходов действует только для этой
+  панели.
+* *Свойства* закреплённого значка могут различаться для каждой панели.
+* Щелчок по значку запущенного приложения выводит его окно на передний план
+  (Shift+щелчок или щелчок средней кнопкой запускает новый экземпляр).
+* Каждая панель сохраняет свой порядок кнопок, в том числе после перезапуска.
+  Новые окна добавляются в конец.
+* Перетащите закреплённый значок на другую панель, чтобы переместить его туда.
+
+Требуется 64-разрядная Windows 10 или Windows 11 и параметр *Показывать панель
+задач на всех дисплеях*. Проверено с *Группировать кнопки на панели задач:
+Никогда*.
+
+Примечание: другие моды, изменяющие кнопки панели задач, могут мешать работе.
+Проверьте сочетание сами, гарантии нет.
+
+---
+
+## ![FR](https://raw.githubusercontent.com/2ndSky95/taskbar-independent-per-monitor/ffbfed14f39f6c66687462cb35a0fd3d22e50295/images/flags/fr.png) Français
+
+Chaque barre des tâches se comporte comme sa propre barre principale.
+
+Les images montrent : éléments épinglés seuls, fenêtres regroupées ou séparées,
+avec et sans étiquettes, déplacement d'une fenêtre vers un autre écran et
+épinglage d'une application.
+
+* Chaque barre des tâches n'affiche que les fenêtres de son propre écran.
+* Épingler/désépingler depuis la liste de raccourcis ne s'applique qu'à cette
+  barre.
+* Les *Propriétés* d'un élément épinglé peuvent différer selon la barre.
+* Un clic sur l'élément épinglé d'une application en cours ramène sa fenêtre au
+  premier plan (Maj+clic ou clic du milieu lance une nouvelle instance).
+* Chaque barre conserve son propre ordre de boutons, même après un redémarrage.
+  Les nouvelles fenêtres sont ajoutées à la fin.
+* Faites glisser un élément épinglé vers une autre barre pour l'y déplacer.
+
+Nécessite Windows 10 ou Windows 11 64 bits et *Afficher ma barre des tâches sur
+tous les écrans*. Testé avec *Combiner les boutons de la barre des tâches :
+Jamais*.
+
+Remarque : d'autres mods qui modifient les boutons de la barre des tâches peuvent
+gêner. Vérifiez la combinaison vous-même, sans garantie.
+
+---
+
+## ![ES](https://raw.githubusercontent.com/2ndSky95/taskbar-independent-per-monitor/ffbfed14f39f6c66687462cb35a0fd3d22e50295/images/flags/es.png) Español
+
+Cada barra de tareas funciona como su propia barra principal.
+
+Las imágenes muestran: solo elementos anclados, ventanas agrupadas y separadas,
+con y sin etiquetas, arrastrar una ventana a otro monitor y anclar una aplicación.
+
+* Cada barra de tareas muestra solo las ventanas de su propio monitor.
+* Anclar/desanclar desde la lista de accesos directos solo se aplica a esa barra.
+* Las *Propiedades* de un elemento anclado pueden ser distintas en cada barra.
+* Al hacer clic en el elemento anclado de una aplicación en ejecución, su ventana
+  pasa al frente (Mayús+clic o clic central abre una nueva instancia).
+* Cada barra conserva su propio orden de botones, también tras reiniciar. Las
+  ventanas nuevas se añaden al final.
+* Arrastra un elemento anclado a otra barra para moverlo allí.
+
+Requiere Windows 10 u 11 de 64 bits y *Mostrar mi barra de tareas en todas las
+pantallas*. Probado con *Combinar botones de la barra de tareas: Nunca*.
+
+Nota: otros mods que cambian los botones de la barra de tareas pueden interferir.
+Comprueba la combinación tú mismo, sin garantía.
+
+---
+
+![GB](https://raw.githubusercontent.com/2ndSky95/taskbar-independent-per-monitor/ffbfed14f39f6c66687462cb35a0fd3d22e50295/images/flags/gb.png) **Report a bug**  ·  ![DE](https://raw.githubusercontent.com/2ndSky95/taskbar-independent-per-monitor/ffbfed14f39f6c66687462cb35a0fd3d22e50295/images/flags/de.png) **Fehler melden**  ·  ![RU](https://raw.githubusercontent.com/2ndSky95/taskbar-independent-per-monitor/ffbfed14f39f6c66687462cb35a0fd3d22e50295/images/flags/ru.png) **Сообщить об ошибке**  ·  ![FR](https://raw.githubusercontent.com/2ndSky95/taskbar-independent-per-monitor/ffbfed14f39f6c66687462cb35a0fd3d22e50295/images/flags/fr.png) **Signaler un bug**  ·  ![ES](https://raw.githubusercontent.com/2ndSky95/taskbar-independent-per-monitor/ffbfed14f39f6c66687462cb35a0fd3d22e50295/images/flags/es.png) **Informar de un error**
+
+[github.com/ramensoftware/windhawk-mods/issues](https://github.com/ramensoftware/windhawk-mods/issues/new?template=bug_report.md&title=%5BIndependent%20taskbar%20per%20monitor%5D%20)
 */
 // ==/WindhawkModReadme==
 
@@ -432,6 +549,20 @@ static bool InMask(unsigned mask, int mon) {
     return mon >= 1 && mon <= kMaxMon && (mask & (1u << (mon - 1)));
 }
 
+// "Disable grouping on the taskbar" (taskbar-grouping) gives window groups their own app ID:
+// the original app ID + "~Wh~" + type letter + 8 hex digits. Length of the app ID without it.
+static size_t BaseAppIdLen(PCWSTR id) {
+    size_t n = wcslen(id);
+    if (n <= 13) return n;
+    PCWSTR s = id + n - 13;
+    if (s[0] != L'~' || s[1] != L'W' || s[2] != L'h' || s[3] != L'~') return n;
+    for (int i = 5; i < 13; i++) {
+        wchar_t c = s[i];
+        if (!((c >= L'0' && c <= L'9') || (c >= L'A' && c <= L'F'))) return n;
+    }
+    return n - 13;
+}
+
 // 0 = no rule (default Windows behavior), otherwise a monitor bit mask
 static unsigned AssignedMonitor(void* g) {
     if (!g || !pGroupGetFlags || !pGroupGetAppID) return 0;
@@ -439,7 +570,7 @@ static unsigned AssignedMonitor(void* g) {
     PCWSTR id = pGroupGetAppID(g);
     if (!id) return 0;
     std::wstring lid;
-    for (const wchar_t* p = id; *p; p++) lid += (wchar_t)towlower(*p);
+    for (size_t i = 0, n = BaseAppIdLen(id); i < n; i++) lid += (wchar_t)towlower(id[i]);
     std::lock_guard<std::mutex> l(g_rulesMx);
     for (auto& r : g_s.rules) {
         if (r.app == lid) return r.mask;
@@ -3017,6 +3148,41 @@ static const wchar_t* AppOf(void* g) {
     return id ? id : L"?";
 }
 static std::wstring KeyOf(void* g) { return Lower(AppOf(g)); }
+// Key of the app without the suffix of "Disable grouping on the taskbar" (pin rules use it)
+static std::wstring BaseKeyOf(void* g) {
+    PCWSTR id = AppOf(g);
+    return Lower(std::wstring(id, BaseAppIdLen(id)));
+}
+
+// Pinned group behind a window group of "Disable grouping on the taskbar" (pins stay in place):
+// the window has its own group with a suffixed app ID, the pin is a separate group. Returns the
+// pinned group with a reference (release with Release), or nullptr if g has no suffix / no pin.
+static bool HasWhSuffix(void* g) {
+    PCWSTR id = (g && pGroupGetAppID) ? pGroupGetAppID(g) : nullptr;
+    return id && BaseAppIdLen(id) != wcslen(id);
+}
+
+// Pinned group with this exact key on any taskbar, with a reference (or nullptr)
+static void* FindPinnedGroup(const std::wstring& base, void* except) {
+    if (!pGroupGetAppID || !pGroupGetFlags) return nullptr;
+    std::set<void*> bars;
+    {
+        std::lock_guard<std::mutex> l(g_mx);
+        bars = g_bars;
+    }
+    std::set<void*> groups;
+    for (void* tl : bars) GroupsOfBar(tl, groups);
+    void* found = nullptr;
+    for (void* o : groups) {
+        if (!found && o != except && Pinned(o) && KeyOf(o) == base) found = o;
+        else ((IUnknown*)o)->Release();
+    }
+    return found;
+}
+
+static void* PinGroupFor(void* g) {
+    return HasWhSuffix(g) ? FindPinnedGroup(BaseKeyOf(g), g) : nullptr;
+}
 
 // this of a CTaskListWnd call -> known tl pointer (or nullptr)
 static void* BarOf(void* self) {
@@ -3059,7 +3225,7 @@ static bool TakePinEvent(void* g, bool pin, std::wstring& key) {
     DWORD now = GetTickCount();
     LASTINPUTINFO li{.cbSize = sizeof(li)};
     if (now - g_initTick < 10000 || !GetLastInputInfo(&li) || now - li.dwTime > 8000) return false;
-    key = KeyOf(g);
+    key = BaseKeyOf(g);
     std::wstring tag = (pin ? L"+" : L"-") + key;
     if (tag == g_lastEvt && now - g_lastEvtTick < 3000) return false;
     g_lastEvt = tag;
@@ -3069,6 +3235,9 @@ static bool TakePinEvent(void* g, bool pin, std::wstring& key) {
 
 // Most recently opened jump list (taskbar + group)
 static HMONITOR g_jumpMon = nullptr;
+// Its group was a window group of "Disable grouping on the taskbar" whose app is not pinned:
+// "Pin" there makes Windows create a new pinned group (no HandleTaskGroupPinned) - key of the app
+static std::wstring g_jumpWinKey;
 
 // Monitor of the action: jump list of the last 20 s, otherwise the mouse cursor (e.g. Start menu)
 static int ActionMonitor() {
@@ -3088,7 +3257,7 @@ static void SetFakeGroup(void* g) {
 // unpins it right away), the follow-up removes it there again
 static DWORD g_newPinTick = 0;
 static bool IsNewPin(void* g) {
-    return !g_newPinKey.empty() && GetTickCount() - g_newPinTick < 3000 && KeyOf(g) == g_newPinKey;
+    return !g_newPinKey.empty() && GetTickCount() - g_newPinTick < 3000 && Pinned(g) && BaseKeyOf(g) == g_newPinKey;
 }
 
 using GroupEvt_t = void (*)(void*, void*);
@@ -3218,8 +3387,12 @@ static bool SetGroupShortcut(void* g, PIDLIST_ABSOLUTE pidl) {
 // Jump list: show as "not pinned" on taskbars where the pin isn't allowed
 using ShowJump_t = HRESULT (*)(void*, void*, void*, bool);
 static ShowJump_t ShowJump_orig;
-static HRESULT ShowJump_hook(void* self, void* g, void* item, bool b) {
+static HRESULT ShowJump_hook(void* self, void* wg, void* item, bool b) {
     void* tl = BarOf(self);
+    // Window button of "Disable grouping on the taskbar": its jump list shows the pin state of the
+    // separate pinned group (that mod switches to it) - so work on that group
+    void* pg = tl ? PinGroupFor(wg) : nullptr;
+    void* g = pg ? pg : wg;
     bool fake = false;
     if (tl && g && Pinned(g) && !ShouldShow(tl, g, nullptr) && pGroupUpdateFlags) {
         g_selfFlag = true;
@@ -3241,7 +3414,7 @@ static HRESULT ShowJump_hook(void* self, void* g, void* item, bool b) {
             ILFree(sw);
         }
     }
-    HRESULT hr = ShowJump_orig(self, g, item, b);
+    HRESULT hr = ShowJump_orig(self, wg, item, b);
     if (swapped) SetGroupShortcut(g, saved);
     else if (saved) ILFree(saved);
     if (fake) pGroupUpdateFlags(g, 0x1, 0x1);
@@ -3251,9 +3424,11 @@ static HRESULT ShowJump_hook(void* self, void* g, void* item, bool b) {
         g_jumpTick = GetTickCount();
         SetFakeGroup(fake ? g : nullptr);
         SetJumpGroup(g);
+        g_jumpWinKey = (!pg && HasWhSuffix(wg) && !Pinned(wg)) ? BaseKeyOf(wg) : L"";
     }
-    Wh_Log(L"-> Jump list on monitor %d%ls: %.40ls", tl ? MonNumber(GetMonitor_orig(tl)) : 0,
-         fake ? L" (as not pinned)" : L"", AppOf(g));
+    Wh_Log(L"-> Jump list on monitor %d%ls%ls: %.40ls", tl ? MonNumber(GetMonitor_orig(tl)) : 0,
+         fake ? L" (as not pinned)" : L"", pg ? L" (pin of a window group)" : L"", AppOf(g));
+    if (pg) ((IUnknown*)pg)->Release();
     return hr;
 }
 
@@ -3261,10 +3436,35 @@ static HRESULT ShowJump_hook(void* self, void* g, void* item, bool b) {
 using EnumPinned_t = HRESULT (*)(void*, bool, bool, bool);
 static EnumPinned_t EnumPinned_orig;
 static HRESULT EnumPinned_hook(void* self, bool a, bool b, bool c) {
-    HRESULT hr = EnumPinned_orig(self, a, b, c);
-    void* g = g_fakeGroup;
     LASTINPUTINFO li{.cbSize = sizeof(li)};
     DWORD now = GetTickCount();
+    // "Pin" in the jump list of a window group of "Disable grouping on the taskbar": Windows creates
+    // a new pinned group while rereading. Rule = taskbar of the jump list, set beforehand so that the
+    // filter already applies; the primary taskbar plays along briefly (otherwise Windows unpins it).
+    std::wstring winKey;
+    bool ruleSet = false;
+    if (!g_jumpWinKey.empty() && now - g_jumpTick < 20000 && GetLastInputInfo(&li) && now - li.dwTime < 8000) {
+        winKey = g_jumpWinKey;
+        g_jumpWinKey.clear();
+        int mon = MonNumber(g_jumpMon);
+        if (mon >= 1 && mon <= kMaxMon && !LoadPinRules().count(winKey)) {
+            SetRule(winKey, 1u << (mon - 1));
+            ruleSet = true;
+        }
+        g_newPinKey = winKey;
+        g_newPinTick = now;
+    }
+    HRESULT hr = EnumPinned_orig(self, a, b, c);
+    if (!winKey.empty()) {
+        if (void* pg = FindPinnedGroup(winKey, nullptr)) {
+            Wh_Log(L"-> Pinned from a window group on monitor %d: %ls", MonNumber(g_jumpMon), winKey.c_str());
+            QueueApply(pg);
+            ((IUnknown*)pg)->Release();
+        } else if (ruleSet) {
+            SetRule(winKey, 0);  // nothing was pinned
+        }
+    }
+    void* g = g_fakeGroup;
     if (g && now - g_jumpTick < 20000 && GetLastInputInfo(&li) && now - li.dwTime < 8000 && Pinned(g)) {
         int mon = MonNumber(g_jumpMon);
         if (mon >= 1 && mon <= kMaxMon) {
