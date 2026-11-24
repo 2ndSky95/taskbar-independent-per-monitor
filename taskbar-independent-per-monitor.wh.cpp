@@ -10,7 +10,7 @@
 // @description:ru-RU Каждая панель задач показывает только окна своего монитора и имеет свои закреплённые приложения
 // @description:fr-FR Chaque barre des tâches affiche uniquement les fenêtres de son écran et a ses propres applications épinglées
 // @description:es-ES Cada barra de tareas muestra solo las ventanas de su monitor y tiene sus propias aplicaciones ancladas
-// @version         1.7.1
+// @version         1.7.2
 // @author          2ndSky95
 // @github          https://github.com/2ndSky95
 // @license         MIT
@@ -340,6 +340,7 @@ Comprueba la combinación tú mismo, sin garantía.
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <utility>
 
 #undef GetCurrentTime  // macro from windows.h collides with WinRT
 #include <winrt/Windows.UI.Xaml.h>
@@ -569,8 +570,7 @@ static unsigned AssignedMonitor(void* g) {
     if (!(pGroupGetFlags(g) & 0x1)) return 0;  // not pinned
     PCWSTR id = pGroupGetAppID(g);
     if (!id) return 0;
-    std::wstring lid;
-    for (size_t i = 0, n = BaseAppIdLen(id); i < n; i++) lid += (wchar_t)towlower(id[i]);
+    std::wstring lid = Lower(std::wstring(id, BaseAppIdLen(id)));
     std::lock_guard<std::mutex> l(g_rulesMx);
     for (auto& r : g_s.rules) {
         if (r.app == lid) return r.mask;
@@ -594,20 +594,44 @@ static const PROPERTYKEY kAumid = {
     {0x9F4C2855, 0x9F79, 0x4B39, {0xA8, 0xD0, 0xE1, 0xD4, 0x2D, 0xE1, 0xD5, 0xF3}},
     5};
 
-static std::wstring WindowAppId(HWND h) {
+// App ID (System.AppUserModel.ID) from a property store
+static std::wstring StoreAppId(IPropertyStore* ps) {
     std::wstring r;
-    IPropertyStore* ps = nullptr;
-    if (SUCCEEDED(SHGetPropertyStoreForWindow(h, IID_PPV_ARGS(&ps))) && ps) {
-        PROPVARIANT pv;
-        PropVariantInit(&pv);
-        if (SUCCEEDED(ps->GetValue(kAumid, &pv)) && pv.vt == VT_LPWSTR &&
-            pv.pwszVal) {
-            r = pv.pwszVal;
-        }
-        PropVariantClear(&pv);
-        ps->Release();
-    }
+    PROPVARIANT pv;
+    PropVariantInit(&pv);
+    if (ps && SUCCEEDED(ps->GetValue(kAumid, &pv)) && pv.vt == VT_LPWSTR && pv.pwszVal) r = pv.pwszVal;
+    PropVariantClear(&pv);
     return r;
+}
+
+static std::wstring WindowAppId(HWND h) {
+    winrt::com_ptr<IPropertyStore> ps;
+    if (FAILED(SHGetPropertyStoreForWindow(h, IID_PPV_ARGS(ps.put())))) return L"";
+    return StoreAppId(ps.get());
+}
+
+static std::wstring PidlAppId(PCIDLIST_ABSOLUTE pidl) {
+    winrt::com_ptr<IPropertyStore> ps;
+    if (!pidl || FAILED(SHGetPropertyStoreFromIDList(pidl, GPS_DEFAULT, IID_PPV_ARGS(ps.put())))) return L"";
+    return StoreAppId(ps.get());
+}
+
+// Shortcut file, loaded with STGM_READ or STGM_READWRITE (nullptr if that fails)
+static winrt::com_ptr<IShellLinkW> LoadLink(const std::wstring& path, DWORD mode) {
+    winrt::com_ptr<IShellLinkW> sl;
+    winrt::com_ptr<IPersistFile> pf;
+    if (FAILED(CoCreateInstance(CLSID_ShellLink, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(sl.put()))) ||
+        FAILED(sl->QueryInterface(IID_PPV_ARGS(pf.put()))) || FAILED(pf->Load(path.c_str(), mode))) {
+        return nullptr;
+    }
+    return sl;
+}
+
+static std::wstring FileAppId(const std::wstring& path) {
+    winrt::com_ptr<IPropertyStore> ps;
+    auto sl = LoadLink(path, STGM_READ);
+    if (!sl || FAILED(sl->QueryInterface(IID_PPV_ARGS(ps.put())))) return L"";
+    return StoreAppId(ps.get());
 }
 
 // App ID of a packaged app (e.g. Windows Notepad) via its process
@@ -648,41 +672,29 @@ static void ResolveTarget(const std::wstring& path, Target& t) {
         t.exactPath = lp;
         return;
     }
-    IShellLinkW* sl = nullptr;
-    if (FAILED(CoCreateInstance(CLSID_ShellLink, nullptr, CLSCTX_INPROC_SERVER,
-                                IID_PPV_ARGS(&sl))) ||
-        !sl) {
-        return;
-    }
-    IPersistFile* pf = nullptr;
-    if (SUCCEEDED(sl->QueryInterface(IID_PPV_ARGS(&pf))) && pf) {
-        if (SUCCEEDED(pf->Load(path.c_str(), STGM_READ))) {
-            wchar_t raw[MAX_PATH] = {}, exp[MAX_PATH * 2] = {},
-                    args[1024] = {};
-            sl->GetPath(raw, MAX_PATH, nullptr, SLGP_RAWPATH);
-            ExpandEnvironmentStringsW(raw, exp, ARRAYSIZE(exp));
-            sl->GetArguments(args, ARRAYSIZE(args));
-            std::wstring target = Lower(exp);
-            std::wstring a = args;
-            size_t k = a.find(L"--processStart ");
-            if (FileName(target) == L"update.exe" && k != std::wstring::npos) {
-                std::wstring rest = a.substr(k + 15);
-                if (!rest.empty() && rest[0] == L'"') {
-                    rest = rest.substr(1);
-                    rest = rest.substr(0, rest.find(L'"'));
-                } else {
-                    rest = rest.substr(0, rest.find(L' '));
-                }
-                t.name = Lower(rest);
-                t.dirPrefix = DirOf(target);
-            } else {
-                t.exactPath = target;
-                t.hasArgs = args[0] != 0;
-            }
+    auto sl = LoadLink(path, STGM_READ);
+    if (!sl) return;
+    wchar_t raw[MAX_PATH] = {}, exp[MAX_PATH * 2] = {}, args[1024] = {};
+    sl->GetPath(raw, MAX_PATH, nullptr, SLGP_RAWPATH);
+    ExpandEnvironmentStringsW(raw, exp, ARRAYSIZE(exp));
+    sl->GetArguments(args, ARRAYSIZE(args));
+    std::wstring target = Lower(exp);
+    std::wstring a = args;
+    size_t k = a.find(L"--processStart ");
+    if (FileName(target) == L"update.exe" && k != std::wstring::npos) {
+        std::wstring rest = a.substr(k + 15);
+        if (!rest.empty() && rest[0] == L'"') {
+            rest = rest.substr(1);
+            rest = rest.substr(0, rest.find(L'"'));
+        } else {
+            rest = rest.substr(0, rest.find(L' '));
         }
-        pf->Release();
+        t.name = Lower(rest);
+        t.dirPrefix = DirOf(target);
+    } else {
+        t.exactPath = target;
+        t.hasArgs = args[0] != 0;
     }
-    sl->Release();
 }
 
 struct FindCtx {
@@ -1844,8 +1856,11 @@ static void LoadRules();
 
 static void SetRule(const std::wstring& key, unsigned m) {
     auto rules = LoadPinRules();
-    if (m) rules[key] = m; else rules.erase(key);
-    SavePinRules(rules);
+    auto it = rules.find(key);
+    if (m ? (it == rules.end() || it->second != m) : it != rules.end()) {  // only write a change
+        if (m) rules[key] = m; else rules.erase(key);
+        SavePinRules(rules);
+    }
     LoadRules();
 }
 
@@ -2027,6 +2042,7 @@ static void GroupsOfBar(void* tl, std::set<void*>& groups) {
 // taskbar by it. New buttons go to the end.
 
 static std::wstring KeyOf(void* g);
+static std::wstring BaseKeyOf(void* g);
 static std::mutex g_orderMx;
 static std::map<int, std::vector<std::wstring>> g_pinOrder;
 static bool g_orderLoaded = false;
@@ -2534,7 +2550,7 @@ static bool MovePinTo(void* g, HMONITOR from, HMONITOR target, int index) {
     if (a < 1 || b < 1) return false;
     unsigned m = (MaskOf(g) & ~(1u << (a - 1))) | (1u << (b - 1));
     if (index >= 0) PlacePin(BarOnMonitor(target), KeyOf(g), index);
-    SetRule(KeyOf(g), m);
+    SetRule(BaseKeyOf(g), m);
     Wh_Log(L"-> Pin moved from monitor %d to %d (mask 0x%X): %ls", a, b, m, AppOf(g));
     QueueApply(g);
     return true;
@@ -2926,6 +2942,156 @@ static std::wstring GroupLinkPath(void* g) {
     return s;
 }
 
+// ---------- Pins with the app ID of a single window
+// "Disable grouping on the taskbar" gives each window its own app ID (app ID + "~Wh~w0012ABCD") once
+// the app already has a group (e.g. a pin). Pinning such a window from its jump list makes Windows
+// build the shortcut from the window: that ID and the EXE in the app's version folder
+// (com.squirrel.Discord.Discord~Wh~w001D0CB8, ...\app-1.0.9269\Discord.exe). After a restart the
+// window gets another ID, the pin no longer matches and the app can't be pinned again.
+// The mod pins the app's Start menu shortcut instead (Windows 11: PinTrusted_hook, Windows 10:
+// PinModify_hook in RuntimeBroker) and repairs such pins that already exist when it starts.
+
+// Start menu shortcut with this app ID (searched recursively, a few levels deep)
+static std::wstring FindStartMenuLink(const std::wstring& dir, const std::wstring& appId, int depth) {
+    WIN32_FIND_DATAW fd;
+    HANDLE f = FindFirstFileW((dir + L"\\*").c_str(), &fd);
+    if (f == INVALID_HANDLE_VALUE) return L"";
+    std::wstring found;
+    std::vector<std::wstring> subs;
+    do {
+        std::wstring n = fd.cFileName;
+        if (n == L"." || n == L"..") continue;
+        std::wstring p = dir + L"\\" + n;
+        if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+            if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT)) subs.push_back(p);
+        } else if (n.size() > 4 && _wcsicmp(n.c_str() + n.size() - 4, L".lnk") == 0 &&
+                   _wcsicmp(FileAppId(p).c_str(), appId.c_str()) == 0) {
+            found = p;
+        }
+    } while (found.empty() && FindNextFileW(f, &fd));
+    FindClose(f);
+    if (depth > 0) {
+        for (size_t i = 0; found.empty() && i < subs.size(); i++) found = FindStartMenuLink(subs[i], appId, depth - 1);
+    }
+    return found;
+}
+
+static std::wstring KnownFolder(REFKNOWNFOLDERID id) {
+    PWSTR p = nullptr;
+    std::wstring r;
+    if (SUCCEEDED(SHGetKnownFolderPath(id, 0, nullptr, &p)) && p) r = p;
+    CoTaskMemFree(p);
+    return r;
+}
+
+// For an app ID with a window suffix: the app's Start menu shortcut (empty if none or no suffix)
+static std::wstring StartMenuLinkForWindowId(const std::wstring& id, std::wstring* base = nullptr) {
+    size_t n = id.empty() ? 0 : BaseAppIdLen(id.c_str());
+    if (!n || n == id.size()) return L"";
+    std::wstring b = id.substr(0, n);
+    if (base) *base = b;
+    // Found shortcuts are remembered per app (not the misses: the app may be installed later)
+    static std::mutex cacheMx;
+    static std::map<std::wstring, std::wstring> cache;
+    std::wstring key = Lower(b);
+    {
+        std::lock_guard<std::mutex> l(cacheMx);
+        auto it = cache.find(key);
+        if (it != cache.end() && GetFileAttributesW(it->second.c_str()) != INVALID_FILE_ATTRIBUTES) return it->second;
+    }
+    for (const KNOWNFOLDERID* k : {&FOLDERID_Programs, &FOLDERID_CommonPrograms}) {
+        std::wstring sm = KnownFolder(*k);
+        std::wstring found = sm.empty() ? L"" : FindStartMenuLink(sm, b, 3);
+        if (!found.empty()) {
+            std::lock_guard<std::mutex> l(cacheMx);
+            cache[key] = found;
+            return found;
+        }
+    }
+    return L"";
+}
+
+// Launcher of an app with an updater: the EXE runs from a version folder and an EXE of the same name
+// one folder up starts the current version (...\Discord\app-1.0.9269\Discord.exe -> ...\Discord\Discord.exe).
+// Empty if there is none.
+static std::wstring LauncherOf(const std::wstring& exe) {
+    std::wstring dir = DirOf(exe);  // ends with a backslash
+    if (dir.size() < 2) return L"";
+    std::wstring parent = DirOf(dir.substr(0, dir.size() - 1));
+    if (parent.empty()) return L"";
+    // Only a version folder (app-1.0.9269, 2.3.1, ...): digit and dot - not e.g. System32
+    std::wstring name = dir.substr(parent.size(), dir.size() - parent.size() - 1);
+    if (name.find(L'.') == std::wstring::npos || name.find_first_of(L"0123456789") == std::wstring::npos) return L"";
+    std::wstring launcher = parent + FileName(exe);
+    DWORD a = GetFileAttributesW(launcher.c_str());
+    return (a != INVALID_FILE_ATTRIBUTES && !(a & FILE_ATTRIBUTE_DIRECTORY)) ? launcher : L"";
+}
+
+// Pinning a window of "Disable grouping on the taskbar" (app ID with suffix): ID list of the app's
+// Start menu shortcut to pin instead (free with ILFree), or nullptr. The item to pin is the window's
+// EXE; its name must match the shortcut's target, so that a different app is never pinned instead.
+static PIDLIST_ABSOLUTE StartMenuPidlForWindow(PCIDLIST_ABSOLUTE pidl, const std::wstring& id) {
+    std::wstring start = StartMenuLinkForWindowId(id);
+    wchar_t path[MAX_PATH] = {};
+    if (start.empty() || !pidl || !SHGetPathFromIDListW(pidl, path)) return nullptr;
+    Target t;
+    ResolveTarget(start, t);
+    if (Lower(FileName(path)) != (t.exactPath.empty() ? t.name : FileName(t.exactPath))) return nullptr;
+    PIDLIST_ABSOLUTE lnk = ILCreateFromPathW(start.c_str());
+    if (lnk) Wh_Log(L"-> Pinning the Start menu shortcut instead of window %ls: %ls", id.c_str(), start.c_str());
+    return lnk;
+}
+
+// Pins that already carry a window's app ID: replaced by the Start menu shortcut. Without one the
+// suffix is removed and an EXE in a version folder is replaced by the app's launcher (LauncherOf),
+// so that the next update doesn't break the pin again.
+static void RepairWindowIdPins() {
+    HRESULT co = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+    std::wstring dir = KnownFolder(FOLDERID_RoamingAppData);
+    if (!dir.empty()) dir += L"\\Microsoft\\Internet Explorer\\Quick Launch\\User Pinned\\TaskBar";
+    WIN32_FIND_DATAW fd;
+    HANDLE f = dir.empty() ? INVALID_HANDLE_VALUE : FindFirstFileW((dir + L"\\*.lnk").c_str(), &fd);
+    if (f != INVALID_HANDLE_VALUE) {
+        do {
+            std::wstring pin = dir + L"\\" + fd.cFileName;
+            std::wstring id = FileAppId(pin), base;
+            std::wstring start = StartMenuLinkForWindowId(id, &base);
+            if (base.empty()) continue;  // no window suffix
+            if (!start.empty() && CopyFileW(start.c_str(), pin.c_str(), FALSE)) {
+                // CopyFileW copies the attributes: a read-only pin couldn't be deleted when it's unpinned
+                DWORD a = GetFileAttributesW(pin.c_str());
+                if (a != INVALID_FILE_ATTRIBUTES && (a & FILE_ATTRIBUTE_READONLY))
+                    SetFileAttributesW(pin.c_str(), a & ~FILE_ATTRIBUTE_READONLY);
+                Wh_Log(L"-> Repaired pin %ls (%ls): Start menu shortcut %ls", fd.cFileName, id.c_str(), start.c_str());
+                continue;
+            }
+            bool ok = false;
+            std::wstring launcher;
+            winrt::com_ptr<IPropertyStore> ps;
+            winrt::com_ptr<IPersistFile> pf;
+            if (auto sl = LoadLink(pin, STGM_READWRITE); sl && SUCCEEDED(sl->QueryInterface(IID_PPV_ARGS(ps.put()))) &&
+                                                         SUCCEEDED(sl->QueryInterface(IID_PPV_ARGS(pf.put())))) {
+                wchar_t exe[MAX_PATH] = {};
+                if (SUCCEEDED(sl->GetPath(exe, MAX_PATH, nullptr, 0)) && *exe) launcher = LauncherOf(exe);
+                if (!launcher.empty()) {
+                    sl->SetPath(launcher.c_str());
+                    std::wstring wd = DirOf(launcher);
+                    sl->SetWorkingDirectory(wd.substr(0, wd.size() - 1).c_str());
+                }
+                PROPVARIANT pv;
+                PropVariantInit(&pv);
+                pv.vt = VT_LPWSTR;
+                pv.pwszVal = base.data();  // SetValue copies it
+                ok = SUCCEEDED(ps->SetValue(kAumid, pv)) && SUCCEEDED(ps->Commit()) && SUCCEEDED(pf->Save(nullptr, TRUE));
+            }
+            Wh_Log(L"-> Repaired pin %ls: app ID %ls -> %ls%ls%ls (%ls)", fd.cFileName, id.c_str(), base.c_str(),
+                   launcher.empty() ? L"" : L", launcher ", launcher.c_str(), ok ? L"ok" : L"failed");
+        } while (FindNextFileW(f, &fd));
+        FindClose(f);
+    }
+    if (SUCCEEDED(co)) CoUninitialize();
+}
+
 static std::wstring BarLinkPath(void* g, int mon, bool create) {
     if (mon < 1 || mon > kMaxMon) return L"";
     std::wstring orig = GroupLinkPath(g);
@@ -3154,15 +3320,9 @@ static std::wstring BaseKeyOf(void* g) {
     return Lower(std::wstring(id, BaseAppIdLen(id)));
 }
 
-// Pinned group behind a window group of "Disable grouping on the taskbar" (pins stay in place):
-// the window has its own group with a suffixed app ID, the pin is a separate group. Returns the
-// pinned group with a reference (release with Release), or nullptr if g has no suffix / no pin.
-static bool HasWhSuffix(void* g) {
-    PCWSTR id = (g && pGroupGetAppID) ? pGroupGetAppID(g) : nullptr;
-    return id && BaseAppIdLen(id) != wcslen(id);
-}
-
-// Pinned group with this exact key on any taskbar, with a reference (or nullptr)
+// Pinned group of this app (key without suffix) on any taskbar, with a reference (or nullptr).
+// Compared without the suffix: a pin made from a window button can carry that window's suffixed
+// app ID (fault of "Disable grouping on the taskbar", repaired in the file by RepairWindowIdPins).
 static void* FindPinnedGroup(const std::wstring& base, void* except) {
     if (!pGroupGetAppID || !pGroupGetFlags) return nullptr;
     std::set<void*> bars;
@@ -3174,14 +3334,22 @@ static void* FindPinnedGroup(const std::wstring& base, void* except) {
     for (void* tl : bars) GroupsOfBar(tl, groups);
     void* found = nullptr;
     for (void* o : groups) {
-        if (!found && o != except && Pinned(o) && KeyOf(o) == base) found = o;
+        if (!found && o != except && Pinned(o) && BaseKeyOf(o) == base) found = o;
         else ((IUnknown*)o)->Release();
     }
     return found;
 }
 
+// Pinned group behind a window group of "Disable grouping on the taskbar" (pins stay in place):
+// the window has its own group with a suffixed app ID, the pin is a separate group. Returns the
+// pinned group with a reference (release with Release), or nullptr.
+// Not recognized by the suffix: while that mod builds a jump list (its ShowJumpView hook may run
+// around ours, depending on the load order) the group reports its app ID without it. Without that
+// mod an unpinned group next to a pinned one of the same app doesn't exist (Windows groups the
+// window with the pin), so this only finds the pin of a separate window group.
 static void* PinGroupFor(void* g) {
-    return HasWhSuffix(g) ? FindPinnedGroup(BaseKeyOf(g), g) : nullptr;
+    if (!g || Pinned(g)) return nullptr;
+    return FindPinnedGroup(BaseKeyOf(g), g);
 }
 
 // this of a CTaskListWnd call -> known tl pointer (or nullptr)
@@ -3235,9 +3403,15 @@ static bool TakePinEvent(void* g, bool pin, std::wstring& key) {
 
 // Most recently opened jump list (taskbar + group)
 static HMONITOR g_jumpMon = nullptr;
-// Its group was a window group of "Disable grouping on the taskbar" whose app is not pinned:
-// "Pin" there makes Windows create a new pinned group (no HandleTaskGroupPinned) - key of the app
+// Its group was not pinned and its app has no pin anywhere: key of the app. "Pin" there may make
+// Windows create a new pinned group without HandleTaskGroupPinned (window group of "Disable
+// grouping on the taskbar"); EnumPinned_hook then gives it the taskbar of the jump list.
 static std::wstring g_jumpWinKey;
+// Same jump list: full app ID of that unpinned group (with the window suffix, if any) and when it
+// was opened, for PinTrusted_hook, which runs on another thread of Explorer (both under the mutex)
+static std::mutex g_jumpWinIdMx;
+static std::wstring g_jumpWinId;
+static DWORD g_jumpWinIdTick = 0;
 
 // Monitor of the action: jump list of the last 20 s, otherwise the mouse cursor (e.g. Start menu)
 static int ActionMonitor() {
@@ -3332,15 +3506,18 @@ static bool SamePinTarget(const std::wstring& path, void* g) {
 static bool HandleExtraPin(const wchar_t* app, const wchar_t* path) {
     void* g = g_fakeGroup;
     if (!g || GetTickCount() - g_jumpTick > 20000 || !Pinned(g)) return false;
-    if ((app && *app && _wcsicmp(app, AppOf(g)) != 0) ||
-        (path && *path && !SamePinTarget(path, g))) {  // another app was pinned
+    // Same app? By app ID if there is one (without the window suffix of "Disable grouping on the
+    // taskbar": its window runs from the EXE, the pin from the launcher), otherwise by target
+    bool other = (app && *app) ? Lower(std::wstring(app, BaseAppIdLen(app))) != BaseKeyOf(g)
+                               : (path && *path && !SamePinTarget(path, g));
+    if (other) {  // another app was pinned
         SetFakeGroup(nullptr);
         return false;
     }
     int mon = MonNumber(g_jumpMon);
     if (mon < 1 || mon > kMaxMon) return false;
     unsigned m = MaskOf(g) | (1u << (mon - 1));
-    SetRule(KeyOf(g), m);
+    SetRule(BaseKeyOf(g), m);
     Wh_Log(L"-> Additionally pinned on monitor %d (mask 0x%X, order kept): %ls", mon, m, AppOf(g));
     g_swallowAddKey = KeyOf(g);
     g_swallowAddTick = GetTickCount();
@@ -3371,7 +3548,7 @@ static LRESULT HandleUnpinOne(const wchar_t* app) {
     if (mon < 1 || mon > kMaxMon || !InMask(mask, mon)) return 0;
     unsigned rest = mask & ~(1u << (mon - 1));
     if (!rest) return 0;  // last taskbar: let it unpin normally
-    SetRule(KeyOf(g), rest);
+    SetRule(BaseKeyOf(g), rest);
     Wh_Log(L"-> Unpinned only from monitor %d, stays on mask 0x%X: %ls", mon, rest, AppOf(g));
     QueueApply(g);
     return 1;
@@ -3424,7 +3601,10 @@ static HRESULT ShowJump_hook(void* self, void* wg, void* item, bool b) {
         g_jumpTick = GetTickCount();
         SetFakeGroup(fake ? g : nullptr);
         SetJumpGroup(g);
-        g_jumpWinKey = (!pg && HasWhSuffix(wg) && !Pinned(wg)) ? BaseKeyOf(wg) : L"";
+        g_jumpWinKey = (!pg && !Pinned(wg)) ? BaseKeyOf(wg) : L"";
+        std::lock_guard<std::mutex> l(g_jumpWinIdMx);
+        g_jumpWinId = (!pg && !Pinned(wg)) ? AppOf(wg) : L"";
+        g_jumpWinIdTick = g_jumpTick;
     }
     Wh_Log(L"-> Jump list on monitor %d%ls%ls: %.40ls", tl ? MonNumber(GetMonitor_orig(tl)) : 0,
          fake ? L" (as not pinned)" : L"", pg ? L" (pin of a window group)" : L"", AppOf(g));
@@ -3469,7 +3649,7 @@ static HRESULT EnumPinned_hook(void* self, bool a, bool b, bool c) {
         int mon = MonNumber(g_jumpMon);
         if (mon >= 1 && mon <= kMaxMon) {
             unsigned m = MaskOf(g) | (1u << (mon - 1));
-            SetRule(KeyOf(g), m);
+            SetRule(BaseKeyOf(g), m);
             Wh_Log(L"-> Additionally pinned on monitor %d (mask 0x%X): %ls", mon, m, AppOf(g));
             QueueApply(g);
         }
@@ -3605,17 +3785,8 @@ static bool AskExtraPin(PCIDLIST_ABSOLUTE pidl) {
     if (pidl) {
         SHGetPathFromIDListW(pidl, path);
         data = path;
-        IPropertyStore* ps = nullptr;
-        if (SUCCEEDED(SHGetPropertyStoreFromIDList(pidl, GPS_DEFAULT, IID_PPV_ARGS(&ps))) && ps) {
-            PROPVARIANT pv;
-            PropVariantInit(&pv);
-            if (SUCCEEDED(ps->GetValue(kAumid, &pv)) && pv.vt == VT_LPWSTR && pv.pwszVal) {
-                data += L'|';
-                data += pv.pwszVal;
-            }
-            PropVariantClear(&pv);
-            ps->Release();
-        }
+        std::wstring id = PidlAppId(pidl);
+        if (!id.empty()) data += L'|' + id;
     }
     DWORD_PTR r = 0;
     COPYDATASTRUCT cd{0x534B5032, (DWORD)((data.size() + 1) * sizeof(wchar_t)), (void*)data.c_str()};  // "SKP2"
@@ -3647,16 +3818,25 @@ static HRESULT PinModify_hook(void* self, PCIDLIST_ABSOLUTE from, PCIDLIST_ABSOL
         }
         PWSTR app = nullptr;
         if (pGetAppIDForPinned) pGetAppIDForPinned(self, to, &app);
+        std::wstring id = app ? app : L"";
+        if (app) CoTaskMemFree(app);
+        std::wstring base = id.substr(0, BaseAppIdLen(id.c_str()));
         HWND w = FindWindowExW(HWND_MESSAGE, nullptr, kMsgClass, nullptr);
         DWORD_PTR r = 0;
         bool swallow = false;
-        if (w && app) {
-            COPYDATASTRUCT cd{0x534B4131, (DWORD)((wcslen(app) + 1) * sizeof(wchar_t)), (PVOID)app};
+        if (w && !base.empty()) {
+            COPYDATASTRUCT cd{0x534B4131, (DWORD)((base.size() + 1) * sizeof(wchar_t)), (PVOID)base.c_str()};
             swallow = SendMessageTimeoutW(w, WM_COPYDATA, 0, (LPARAM)&cd, SMTO_ABORTIFHUNG, 1500, &r) && r == 1;
         }
-        Wh_Log(L"-> Pin list: append %ls (caller %d)%ls", app ? app : L"?", caller, swallow ? L" - intercepted" : L"");
-        if (app) CoTaskMemFree(app);
+        Wh_Log(L"-> Pin list: append %ls (caller %d)%ls", id.empty() ? L"?" : id.c_str(), caller, swallow ? L" - intercepted" : L"");
         if (swallow) return S_OK;
+        // Windows 10 pins from the jump list here (RuntimeBroker), with the app ID of the window:
+        // a window of "Disable grouping on the taskbar" gets its app's Start menu shortcut instead
+        if (PIDLIST_ABSOLUTE lnk = StartMenuPidlForWindow(to, id)) {
+            HRESULT hr = PinModify_orig(self, from, lnk, caller, flags);
+            ILFree(lnk);
+            if (SUCCEEDED(hr)) return hr;
+        }
     }
     return PinModify_orig(self, from, to, caller, flags);
 }
@@ -3785,6 +3965,21 @@ static HRESULT PinTrusted_hook(void* self, PCIDLIST_ABSOLUTE pidl, int caller) {
     bool extra = AskExtraPin(pidl);
     Wh_Log(L"-> PinManager: pin (caller %d)%ls", caller, extra ? L" - additional taskbar only" : L"");
     if (extra) return S_OK;
+    // A window of "Disable grouping on the taskbar" (app ID with suffix): pin the app's Start menu
+    // shortcut instead, as pinning from the Start menu does (see RepairWindowIdPins). The item to pin
+    // is the window's EXE; its app ID comes from the jump list just opened (Explorer only), and the
+    // EXE name must match the shortcut's, so that a different app is never pinned instead.
+    std::wstring id = PidlAppId(pidl);
+    if (BaseAppIdLen(id.c_str()) == id.size()) {
+        std::lock_guard<std::mutex> l(g_jumpWinIdMx);  // taken once: one pin per jump list
+        std::wstring jump = std::exchange(g_jumpWinId, std::wstring());
+        if (!jump.empty() && GetTickCount() - g_jumpWinIdTick < 20000) id = std::move(jump);
+    }
+    if (PIDLIST_ABSOLUTE lnk = StartMenuPidlForWindow(pidl, id)) {
+        HRESULT hr = PinTrusted_orig(self, lnk, caller);
+        ILFree(lnk);
+        if (SUCCEEDED(hr)) return hr;
+    }
     return PinTrusted_orig(self, pidl, caller);
 }
 static bool InitPinListHooks() {
@@ -4073,9 +4268,27 @@ static bool HookWin10(HMODULE tb) {
     return true;
 }
 
+// Only in the Explorer process that owns the taskbar (folder windows can run in their own
+// explorer.exe, which loads the mod too). At logon the taskbar appears after the mod has loaded.
+static DWORD WINAPI RepairPinsThread(LPVOID) {
+    for (int i = 0; i < 600 && !g_unloading; i++) {
+        if (HWND tray = FindWindowW(L"Shell_TrayWnd", nullptr)) {
+            DWORD pid = 0;
+            GetWindowThreadProcessId(tray, &pid);
+            if (pid == GetCurrentProcessId()) RepairWindowIdPins();
+            return 0;
+        }
+        Sleep(100);
+    }
+    return 0;
+}
+
 void Wh_ModAfterInit() {
     HookLateModules();  // loaded while the mod was initializing
-    if (g_isExplorer) ApplyAppsMode();  // hooks are active now
+    if (g_isExplorer) {
+        ApplyAppsMode();  // hooks are active now
+        StartWorker(RepairPinsThread, nullptr);
+    }
 }
 
 void Wh_ModSettingsChanged() {
