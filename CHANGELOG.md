@@ -1,5 +1,43 @@
 # Änderungen – Taskbar Monitor Pins
 
+## 1.7.2 – 24.11.2026 (im Katalog seit 25.11.2026, PR #7901)
+- **Kein kaputter Pin mehr beim Anheften am Fenster** (Testbericht von mrsprinkles, ramensoftware/windhawk-mods#7783):
+  Mit „Disable grouping on the taskbar“ bekam ein Pin, der über die Sprungliste eines Fenster-Buttons angeheftet
+  wurde, die App-Kennung genau dieses Fensters (`com.squirrel.Discord.Discord~Wh~w001D0CB8`) und die EXE im
+  Versionsordner. Nach einem Neustart passte er nicht mehr, und die App ließ sich nicht neu anheften.
+  Ursache liegt in „Disable grouping“ allein (nachgestellt 24.11.2026, unsere Mod aus): App angeheftet, Fenster
+  öffnet sich (bekommt Endung), über die Fenster-Sprungliste lösen und wieder anheften.
+  - Beim Anheften (`PinManager::PinItemFromTrustedCaller`, läuft im Explorer) heftet die Mod in diesem Fall die
+    Startmenü-Verknüpfung der App an, wie beim Anheften aus dem Startmenü. Die Kennung kommt aus der gerade
+    geöffneten Sprungliste; der EXE-Name muss zur Verknüpfung passen, sonst bleibt alles wie von Windows gewollt.
+  - **Nach KI-Review (24.11.2026, PR #7901) entfernt:** die Reparatur vorhandener Pins beim Start
+    (`RepairWindowIdPins`, `RepairPinsThread`, `LauncherOf`). Sie schrieb Dateien im Pin-Ordner um, ungefragt
+    und dauerhaft (gegen die Windhawk-Regel „keine Änderungen, die die Mod überdauern“). Vorhandene Pin-Dateien
+    bleiben jetzt unverändert; ein kaputter Pin wird durch Lösen und neu Anheften sauber.
+  - Die Umgehung ist als **vorübergehend** gekennzeichnet (Code-Kommentar + Readme in 5 Sprachen mit Link auf
+    ramensoftware/windhawk-mods#7900), bis „Disable grouping“ den Fehler selbst behebt.
+  - Startmenü-Suche: Treffer pro App gemerkt, Fehlschläge 5 Minuten (vorher bei jedem Anheften neu gesucht).
+  - Windows 10: Dort heftet die Sprungliste in RuntimeBroker an (Pin-Liste `CPinnedList::InternalModify`). Die
+    Kennung des Fensters mit Endung steht dort an, also tauscht die Mod auch hier gegen die Startmenü-Verknüpfung
+    (gemeinsamer Helfer `StartMenuPidlForWindow` für Windows 10 und 11). Getestet 24.11.2026 in der Tiny10-VM mit
+    Discord und „Disable grouping“: Verknüpfung sofort sauber, Pin direkt neben dem Fenster.
+- „Zusätzlich anheften“ eines Pins mit Fenster-Kennung: `SKA1` vergleicht beidseitig ohne Endung
+  (`g_swallowAddKey = BaseKeyOf(g)`, `BaseKeyOf(g_fakeGroup)`), sonst rutschte der Pin ans Ende der Liste.
+- `GroupIcon` und der Button-Leser (`ReadButtons`/`ReadButtonsThread`) nutzen `winrt::com_ptr` statt Release.
+- Pin-Regeln werden überall ohne Fenster-Endung gespeichert (`BaseKeyOf`) und nur bei einer Änderung geschrieben.
+- **Sprungliste eines Fensters zeigt wieder „An Taskleiste anheften“**, wenn die App nur auf einer anderen
+  Leiste angeheftet ist, auch wenn „Disable grouping“ in der Hook-Reihenfolge außen liegt (die Endung ist dann
+  während der Sprungliste unsichtbar). Erkennung jetzt: nicht angeheftete Gruppe + Pin derselben App, ohne Endung.
+- **Anheften am Fenster landet auf der richtigen Leiste:** Der neue Pin hatte die Fenster-Kennung, die Mod fand
+  ihn nicht, hielt das für „nichts angeheftet“ und löschte die gerade gesetzte Regel (Pin landete auf der
+  Hauptleiste). Pins werden jetzt ohne Endung verglichen; „zusätzlich anheften“ vergleicht ebenfalls ohne Endung.
+- Code: Verknüpfungen und App-Kennungen über gemeinsame Helfer (`LoadLink`, `StoreAppId`, `PidlAppId`) mit
+  `winrt::com_ptr` statt Release von Hand. Kennung der Sprungliste und ihr Zeitpunkt gehen gemeinsam unter einer
+  Sperre an den Anheft-Thread und werden in einem Schritt entnommen (`std::exchange`).
+- Getestet mit und ohne „Disable grouping“ (Pinned items remain in place, Place ungrouped items together):
+  Anheften am Fenster (Discord, Windhawk), zusätzlich anheften/nur hier lösen,
+  Neuladen der Mod, Discord-Neustart, Explorer-Neustarts, 0 Abstürze.
+
 ## 1.7.1 – 22.11.2026
 - **Verträglich mit „Disable grouping on the taskbar“** (auch „Pinned items remain in place“, Wunsch aus
   ramensoftware/windhawk-mods#7783). Diese Mod gibt jedem Fenster eine eigene App-Gruppe mit Endung

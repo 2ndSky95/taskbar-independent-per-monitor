@@ -1,6 +1,6 @@
 # Independent taskbar per monitor
 
-[Windhawk](https://windhawk.net) mod for Windows 11: each taskbar behaves like its own main taskbar.
+[Windhawk](https://windhawk.net) mod for Windows 10 and 11: each taskbar behaves like its own main taskbar.
 
 ![Each taskbar shows only the windows of its own monitor](images/windows-per-monitor.png)
 
@@ -11,11 +11,13 @@
 * Pin *Properties* can differ per taskbar.
 * Clicking the pin of a running app brings its window to the front.
 
-Requires Windows 11 and *Show my taskbar on all displays*.
+Requires *Show my taskbar on all displays*.
 
 ## Install
 
-Windhawk → *Create a new mod* → paste [`taskbar-independent-per-monitor.wh.cpp`](taskbar-independent-per-monitor.wh.cpp) → *Compile Mod*.
+In Windhawk, search for *Independent taskbar per monitor* and click *Install* ([catalog page](https://windhawk.net/mods/taskbar-independent-per-monitor)).
+
+The source here is the same as in the catalog. To try a newer test version, use *Create a new mod*, paste [`taskbar-independent-per-monitor.wh.cpp`](taskbar-independent-per-monitor.wh.cpp) and click *Compile Mod*.
 
 ## License
 
